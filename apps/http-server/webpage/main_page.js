@@ -327,16 +327,16 @@
                                 } else {
                                         if (msg.data.includes("ft:") && generalState == 1) {
                                                 // Delete previous frame types:
-                                                var i, L = document.getElementById("frameTypeSelect").options.length - 1;
-                                                for (i = L; i >= 0; i--) {
-                                                        document.getElementById("frameTypeSelect").remove(i);
-                                                }
+                                                // var i, L = document.getElementById("frameTypeSelect").options.length - 1;
+                                                // for (i = L; i >= 0; i--) {
+                                                //         document.getElementById("frameTypeSelect").remove(i);
+                                                // }
 
                                                 var message = msg.data.substring(msg.data.indexOf(":") + 1);
                                                 const frameTypes = message.split(',');
                                                 var i = 0;
                                                 while (i < frameTypes.length) {
-                                                        var newOption = document.createElement("option");
+                                                        var newOption = document.createElement("hmc-dropdown-option");
                                                         newOption.value = frameTypes[i];
                                                         newOption.text = frameTypes[i];
                                                         document.getElementById("frameTypeSelect").add(newOption, document.getElementById("frameTypeSelect")[i]);
@@ -348,17 +348,17 @@
 
                                         } else if (msg.data.includes("format:") && generalState == 2) {
                                                 // Delete previous formats:
-                                                var i, L = document.getElementById("formatSelect").options.length - 1;
-                                                for (i = L; i >= 0; i--) {
-                                                        document.getElementById("formatSelect").remove(i);
-                                                }
+                                                // var i, L = document.getElementById("formatSelect").options.length - 1;
+                                                // for (i = L; i >= 0; i--) {
+                                                //         document.getElementById("formatSelect").remove(i);
+                                                // }
 
                                                 // Add new formats
                                                 var message = msg.data.substring(msg.data.indexOf(":") + 1);
                                                 const formats = message.split(',');
                                                 var i = 0;
                                                 while (i < formats.length) {
-                                                        var newOption = document.createElement("option");
+                                                        var newOption = document.createElement("hmc-dropdown-option");
                                                         newOption.value = formats[i];
                                                         newOption.text = formats[i];
                                                         document.getElementById("formatSelect").add(newOption, document.getElementById("formatSelect")[i]);
@@ -426,13 +426,14 @@
 
         //Open camera
         function openCamera() {
-                document.getElementById("connectCameraButton").disabled = true;
+                document.getElementById("connectCameraButton").isDisabled = true;
                 if (socketConnected == true) {
                         if (document.getElementById('connectCameraButton').value == "Open") {
                                 camera = document.getElementById('cameraSelect').value;
                                 console.log("Opening camera: " + camera);
                                 socket_tof.send("open:" + camera + "\n");
-                                document.getElementById('cameraSelect').disabled = true;
+                                document.getElementById('cameraSelect').isDisabled = true;
+                                document.getElementById('connectCameraButton').isDisabled = true;
                                 document.getElementById('connectCameraButton').value = "Close"
 
 
@@ -440,7 +441,8 @@
                                 console.log("Closing camera: " + camera);
                                 socket_tof.send("close\n");
                                 camera = "";
-                                document.getElementById('cameraSelect').disabled = false;
+                                document.getElementById('cameraSelect').isDisabled = false;
+                                document.getElementById('connectCameraButton').isDisabled = false;
                                 document.getElementById('connectCameraButton').value = "Open"
 
                                 generalState = 1;
@@ -454,7 +456,7 @@
 
         // Set Frame Type
         function setFrameTypeButton() {
-                document.getElementById("setFrameTypeButton").disabled = true;
+                document.getElementById("setFrameTypeButton").isDisabled = true;
                 if (socketConnected == true && camera != "") {
                         // Sending frame type
                         frameType = document.getElementById("frameTypeSelect").value;
@@ -468,7 +470,7 @@
 
         // Set Format 
         function setFormatButton() {
-                document.getElementById("setFormatButton").disabled = true;
+                document.getElementById("setFormatButton").isDisabled = true;
                 if (socketConnected == true && camera != "" && frameType != "") {
                         // Sending frame type
                         formatType = document.getElementById("formatSelect").value;
@@ -560,7 +562,7 @@
                 console.log("Closing camera: " + camera);
                 socket_tof.send("close\n");
                 camera = "";
-                document.getElementById('cameraSelect').disabled = false;
+                document.getElementById('cameraSelect').isDisabled = false;
                 document.getElementById('connectCameraButton').value = "Open"
 
 
@@ -572,53 +574,53 @@
         // Enable/disable controls
 
         function enableCameraList() {
-                document.getElementById("cameraSelect").disabled = false;
-                document.getElementById("connectCameraButton").disabled = false;
+                document.getElementById("cameraSelect").isDisabled = false;
+                document.getElementById("connectCameraButton").isDisabled = false;
         }
 
         function enableFrameType() {
-                document.getElementById("frameTypeSelect").disabled = false;
-                document.getElementById("setFrameTypeButton").disabled = false;
+                document.getElementById("frameTypeSelect").isDisabled = false;
+                document.getElementById("setFrameTypeButton").isDisabled = false;
         }
 
         function enableFormat() {
-                document.getElementById("formatSelect").disabled = false;
-                document.getElementById("setFormatButton").disabled = false;
+                document.getElementById("formatSelect").isDisabled = false;
+                document.getElementById("setFormatButton").isDisabled = false;
         }
 
         function enableStartStop() {
-                document.getElementById("startButton").disabled = false;
-                document.getElementById("stopButton").disabled = false;
+                document.getElementById("startButton").isDisabled = false;
+                document.getElementById("stopButton").isDisabled = false;
         }
 
         function enableReset() {
-                document.getElementById("resetButton").disabled = false;
+                document.getElementById("resetButton").isDisabled = false;
         }
 
         function disableCameraList() {
-                document.getElementById("cameraSelect").disabled = true;
-                document.getElementById("connectCameraButton").disabled = true;
+                document.getElementById("cameraSelect").isDisabled = true;
+                document.getElementById("connectCameraButton").isDisabled = true;
         }
 
         function disableFrameType() {
 
-                document.getElementById("frameTypeSelect").disabled = true;
-                document.getElementById("setFrameTypeButton").disabled = true;
+                document.getElementById("frameTypeSelect").isDisabled = true;
+                document.getElementById("setFrameTypeButton").isDisabled = true;
         }
 
         function disableFormat() {
 
-                document.getElementById("formatSelect").disabled = true;
-                document.getElementById("setFormatButton").disabled = true;
+                document.getElementById("formatSelect").isDisabled = true;
+                document.getElementById("setFormatButton").isDisabled = true;
         }
 
         function disableStartStop() {
-                document.getElementById("startButton").disabled = true;
-                document.getElementById("stopButton").disabled = true;
+                document.getElementById("startButton").isDisabled = true;
+                document.getElementById("stopButton").isDisabled = true;
         }
 
         function disableReset() {
-                document.getElementById("resetButton").disabled = true;
+                document.getElementById("resetButton").isDisabled = true;
         }
 
         // Disable display section

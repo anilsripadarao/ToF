@@ -7,8 +7,16 @@
 	<script type='text/javascript' src="/lws-common.js"></script>
 	<script type='text/javascript' src='color_map.js'></script>
 	<script type='text/javascript' src='main_page.js'></script>
+
+        <script type="module" src="build/harmonic-core-components.esm.js" data-stencil>
+        </script> 
+        <script nomodule="" src="build/harmonic-core-components.js" data-stencil> 
+        </script> 
+
 	<title>Tof Web App</title>
 </head>
+
+
 
 <body>
 	<div class="mainFrame">
@@ -18,17 +26,14 @@
 					<table>
 						<tr>
 							<td valign=middle align=center>
-								<a>
-									<img src="CompanyIcon.png">
-								</a>
 								<div id=brow hidden></div>
 							</td>
-							<td width="64" height="64" id="wstransport"></td>
-							<td width="64" height="64" id="transport"></td>
 						</tr>
 					</table>
-
-					<h2>Command Interface</h2>
+                                        <div>
+                                                <a><img width="100%" src="ADI_logo.svg"></a>
+                                        </div>
+					<h3>Command Interface</h3>
 					<table>
 						<tr>
 							<td id=wsdi_statustd align=center class="wsstatus">
@@ -39,59 +44,70 @@
 						</tr>
 					</table>
 					</br>
+
 					<!-- Camera selection -->
-					<select class="custom-select" id="cameraSelect" name="cameraSelect" disabled=true>
-						<option value="adsd3030">Adsd3030</option>
-						<option value="adsd3100">Adsd3100</option>
-					</select>
-					<input class="button" type=button id=connectCameraButton value="Open" disabled=true>
+					<select id="cameraSelect" isDisabled=true>
+						<option value="adsd3030"> Adsd3030 </option>
+						<option value="adsd3100"> Adsd3100 </option>
+                                        </select>
+					<div >
+						<hmc-button type=button id=connectCameraButton value="Open"> Open </hmc-button>
+					</div>
 					</br>
 
 					<!-- Frame Type selection -->
-					<select class="custom-select" id="frameTypeSelect" name="frameTypeSelect" disabled = true>
-					</select>
-					<input class="button" type=button id=setFrameTypeButton value="Set Frame Type">
+					<select  id="frameTypeSelect" name="frameTypeSelect" isDisabled = true>
+                                        </select>
+					<div>
+						<hmc-button type=button id=setFrameTypeButton> Set Frame Type </hmc-button>
+					</div>
 					</br>
 
 					<!-- Format selection -->
-					<select class="custom-select" id="formatSelect" name="formatSelect" disabled = true>
-					</select>
-					<input class="button" type=button id=setFormatButton value="Set format">
+					<select id="formatSelect" name="formatSelect" isDisabled = true>
+                                        </select>
+					<div>
+						<hmc-button type=button id=setFormatButton> Set format </hmc-button>
+					</div>
 					</br>
-					<input class="button" type=button id=startButton value="Start" disabled = true>
-					<input class="button" type=button id=stopButton value="Stop" disabled = true>
+					<div>
+						<hmc-button size="md" id=startButton isDisabled = true> Start </hmc-button>
+					</div>
+					<div>
+						<hmc-button size="md" id=stopButton isDisabled = true> Stop </hmc-button>
+					</div>
 					</br>
 
                                         <!-- Frame Type selection -->
-					<input class="button" type=button id=resetButton value="Reset" disabled = true>
+                                        <div style="display: flex; justify-content: center;" width="100%">
+					        <hmc-button  id=resetButton isDisabled=false> Reset </hmc-button>
+                                        </div>
 					</br>
 
-
-                                        <div id=number class="bigger"> </div>
-
-				</div>
-				<div class="column_right" style="background-color:#7f7f7f;">
-						 <div id="count"></div>
-						 <img id="img"></img>
-						 <img id="img2"> </img>
-						 <canvas id="canvas1" width="0" height="0" willReadFrequently="true"></canvas>
-						 <canvas id="canvas2" width="0" height="0" willReadFrequently="true"></canvas>
-						</br>
-					<table>
-						<tr>
-							<td align=center>
+                                        <div style="display: flex; justify-content: center;" width="100%" id=number class="bigger">
+                                        </div>
+                                </div>
+                                <div class="column_right" style="background-color:#7f7f7f;">
+                                        <div id="count"></div>
+                                        <img id="img"></img>
+                                        <img id="img2"> </img>
+                                        <canvas id="canvas1" width="0" height="0" willReadFrequently="true"></canvas>
+                                        <canvas id="canvas2" width="0" height="0" willReadFrequently="true"></canvas>
+                                        </br>
+                                        <table>
+                                                <tr>
+                                                        <td align=center>
                                                                 <div id=fps class="bigger" display="hidden"> </div>	
-							</td>
-							<td align=center>
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
+                                                        </td>
+                                                        <td align=center>
+                                                        </td>
+                                                </tr>
+                                        </table>
+                                </div>
+                        </div>
 		</div>
 		<div class="row_bottom">
-			<div id="tofConsole">
-			</div>
+		<div id="tofConsole"></div>
 		</div>
 	</div>
 

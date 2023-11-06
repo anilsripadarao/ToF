@@ -196,7 +196,7 @@ td.t { vertical-align:middle;
 
 .column_left {
 		float: left;
-		width: 25%;
+		width: 35%;
                 max-width: 200px;
 		padding: 10px;
 		height: 100vh;
@@ -240,31 +240,6 @@ td.t { vertical-align:middle;
 
 }
 
-.button {
-		display: block;
-		width: 170px;
-		border: none;
-		background-color: #2b609e;
-		color: white;
-		padding: 10px 20px;
-		font-size: 14px;
-		cursor: pointer;
-		text-align: center;
-}
-
-.button:disabled {
-        display: block;
-        width: 170px;
-        border: none;
-        background-color: #061b33;
-        color: white;
-        padding: 10px 20px;
-        font-size: 14px;
-        cursor: pointer;
-        text-align: center;
-}
-
-
 .custom-select{
 	display: block;
 	width: 170px;
@@ -287,11 +262,6 @@ td.t { vertical-align:middle;
 	font-size: 14px;
 	cursor: pointer;
 	text-align: center;
-}
-
-.button:hover {
-		background-color: #010553;
-		color: rgb(255, 255, 255);
 }
 
 /* Clear floats after the columns */
