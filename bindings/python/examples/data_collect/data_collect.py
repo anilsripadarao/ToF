@@ -148,6 +148,9 @@ if __name__ == '__main__':
     
     if (args.firmware):
         #status = camera1.adsd3500UpdateFirmware(args.firmware)
+        if not os.path.isfile(args.firmware):
+            sys.exit(f"{args.firmware} does not exists")
+
         if status != tof.Status.Ok:
             print('Could not update the Adsd3500 firmware')
         else:
