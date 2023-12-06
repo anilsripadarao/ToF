@@ -37,6 +37,7 @@ import sys
 import time
 import numpy as np
 import threading
+import queue
 
 mode_help_message = """Valid mode (-m) options are:
         0: short-range native;
@@ -51,7 +52,9 @@ mode_help_message = """Valid mode (-m) options are:
 
 
 IP = '10.42.0.1'
-FRAME_TYPES = ['raw', 'depth', 'ir', 'conf','metadata']
+FRAME_TYPES = ['depth', 'conf','metadata','full-frame','ir']
+
+q = queue.Queue()
 
 #create callback and register it to the interrupt routine
 #def callbackFunction(callbackStatus):
@@ -59,22 +62,21 @@ FRAME_TYPES = ['raw', 'depth', 'ir', 'conf','metadata']
 
 def fileWriterTask(**kwargs):
     file_name = f"{kwargs['pFolderPath']}/{kwargs['pFrameType']}_frame_{kwargs['pTimeBuffer']}_{str(kwargs['pLoopCount'])}.bin"
-    with open(file_name, "wb") as file:
-        bin_data = frame.getData(frame_type)
-        file.write(bytearray(bin_data))
-    if kwargs['pFrameType'] == 'depth':
+    
+    if kwargs['pFrameType'] != 'full-frame':
+        with open(file_name, "wb") as file:
+            #bin_data = frame.getData(frame_type)
+            file.write(bytearray(q.get()))
+    else:
         if kwargs['pLoopCount'] == 0:
-            with open(f"{kwargs['pFolderPath']}raw_frame_{kwargs['pTimeBuffer']}.raw", "wb") as file:
+            with open(f"{kwargs['pFolderPath']}/raw_frame_{kwargs['pTimeBuffer']}.raw", "wb") as file:
                 file.write((kwargs['pwidth'].to_bytes(4, byteorder='little', signed=False)))
                 file.write((kwargs['pheight'].to_bytes(4, byteorder='little', signed=False)))
                 file.write((kwargs['n_frames'].to_bytes(4, byteorder='little', signed=False)))
             
-        with open(f"{kwargs['pFolderPath']}raw_frame_{kwargs['pTimeBuffer']}.raw", "ab") as file:
-            file.write(frame.getData("ir"))
-            file.write(frame.getData("depth"))
-            file.write(frame.getData("xyz"))
-            file.write(frame.getData("metadata"))
-                
+        with open(f"{kwargs['pFolderPath']}/raw_frame_{kwargs['pTimeBuffer']}.raw", "ab") as file:
+            file.write(bytearray(q.get()))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser( formatter_class=argparse.RawTextHelpFormatter,
         description='Script to run data collect executible')
@@ -254,16 +256,7 @@ if __name__ == '__main__':
         if frame_type == "depth":
             status = frame.getDataDetails("depth", frameDataDetails)
             if status != tof.Status.Ok:
-                sys.exit("Depth disabled from ini file!")
-            status = frame.getDataDetails("ir", frameDataDetails)
-            if status != tof.Status.Ok:
-                sys.exit("ir disabled from ini file!")   
-            status = frame.getDataDetails("xyz", frameDataDetails)
-            if status != tof.Status.Ok:
-                sys.exit("xyz disabled from ini file!")  
-            status = frame.getDataDetails("metadata", frameDataDetails)
-            if status != tof.Status.Ok:
-                sys.exit("metadata disabled from ini file!")                   
+                sys.exit("Depth disabled from ini file!")                
             
         #IR data
         elif frame_type == "ir":
@@ -285,6 +278,21 @@ if __name__ == '__main__':
             status = frame.getDataDetails(frame_type, frameDataDetails)
             frame_size = frameDataDetails.bytesCount
         
+        #Full raw file Data
+        elif frame_type == "full-frame":
+            status = frame.getDataDetails("depth", frameDataDetails)
+            if status != tof.Status.Ok:
+                sys.exit("Depth disabled from ini file!")
+            status = frame.getDataDetails("ir", frameDataDetails)
+            if status != tof.Status.Ok:
+                sys.exit("ir disabled from ini file!")   
+            status = frame.getDataDetails("xyz", frameDataDetails)
+            if status != tof.Status.Ok:
+                sys.exit("xyz disabled from ini file!")  
+            status = frame.getDataDetails("metadata", frameDataDetails)
+            if status != tof.Status.Ok:
+                sys.exit("metadata disabled from ini file!")      
+        
         else:
             print("Can't recognize frame data type!")
         
@@ -297,15 +305,26 @@ if __name__ == '__main__':
         print("Frame number from metadata: ", metadata.frameNumber)
         print("Mode from metadata: ", metadata.imagerMode)
         
+        if frame_type != "full-frame":
+            bin_data = frame.getData(frame_type)
+            q.put(bin_data)
+        else:
+            #frame.getData(frame_type)
+            ir_data = frame.getData("ir")
+            depth_data = frame.getData("depth")
+            xyz_data = frame.getData("xyz")
+            metadata_data = frame.getData("metadata")
+            bin_data = bytearray(ir_data) + bytearray(depth_data) + bytearray(xyz_data) + bytearray(metadata_data)
+            q.put(bin_data)
+            
         params = {'pFolderPath': args.folder, 'pFrameType': frame_type, 'n_frames': args.ncapture,
         'pTimeBuffer': timebuffer, 'pLoopCount': loopcount, 'pwidth':width, 'pheight':height}
-        t = threading.Thread(target=fileWriterTask, kwargs=params)  
+        fileWriterThread = threading.Thread(target=fileWriterTask, kwargs=params)  
         
-        # Start the thread
-        t.start()
-
-        # Wait for the thread to finish
-        t.join()
+        fileWriterThread.start()
+        if loopcount == args.ncapture - 1:
+        #wait for completion on final loop iteration
+            fileWriterThread.join()
         
     end_time = time.perf_counter_ns()
     total_time = (end_time - start_time) / 1e9;
