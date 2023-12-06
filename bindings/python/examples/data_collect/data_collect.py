@@ -47,7 +47,7 @@ mode_help_message = """Valid mode (-m) options are:
         5: long-range mixed;
         6: short-range mixed
         
-        Note: --m argument supports both index and string (0/sr-native) """
+        Note: --m argument supports both index and string (Default: 0/sr-native) """
 
 
 IP = '10.42.0.1'
@@ -81,19 +81,21 @@ if __name__ == '__main__':
     parser.add_argument(
         'config', help='path to the configuration file (with .json extension)')
     parser.add_argument('-f', dest='folder', default='./',
-                        help='output folder')
+                        help='output folder [default: ./]', metavar = '<folder>')
     parser.add_argument('-n', dest='ncapture', type=int, default=1,
-                        help='number of frame captured')
+                        help='number of frame captured[default: 1]', metavar = '<ncapture>')
     parser.add_argument('-m', dest='mode',  default='sr-native',
-                        help=mode_help_message)
+                        help=mode_help_message, metavar = '<mode>')
     parser.add_argument('-wt', dest='warmup_time', type=int,
-                        default=0, help='warmup time in seconds')
+                        default=0, help='warmup time in seconds[default: 0]', metavar = '<warmup>')
     parser.add_argument('--ccb', type=str, 
                         help='The path to store CCB content', metavar='<FILE>')                    
-    parser.add_argument('--ip', default=IP, help='camera IP')
-    parser.add_argument('-fw', dest='firmware', help='Adsd3500 firmware file')
+    parser.add_argument('--ip', default=IP, help='camera IP[default: 10.42.0.1]', metavar = '<ip>')
+    parser.add_argument('-fw', dest='firmware', help='Adsd3500 firmware file', metavar = '<firmware>')
     parser.add_argument('-ft', dest='frame_type', choices=FRAME_TYPES,
-                        default='depth', help='FrameType of saved image')
+                        default='depth', 
+                        help='FrameType of saved image [depth, conf,metadata,full-frame,ir] [default: full-frame]',
+                        metavar = '<frameType>')
 
     args = parser.parse_args()
 
