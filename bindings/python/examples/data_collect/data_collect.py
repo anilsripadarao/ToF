@@ -175,15 +175,33 @@ if __name__ == '__main__':
         sys.exit('Cound not aquire frame types')
     else:
         print(f'available frame_types: {frame_types}')
-        
+    '''
+    #Working on master. This is if the argument is string  Needs changes based on aditofpytohn changes to list        
     mode_name = 'none'
-    #Working on master. Needs changes based on aditofpytohn
     if (args.mode):
         try:
             args.mode = int(args.mode) # try to convert x to an int
             status = camera1.getFrameTypeNameFromId(args.mode, mode_name)
             if status[0] == tof.Status.Ok:
                 mode_name = status[1]
+                print(f'Mode: {mode_name}')
+            else:
+                sys.exit(f'Mode: {args.mode} is invalid for this type of camera')
+        except ValueError:
+            if args.mode not in frame_types:
+                sys.exit(f'{args.mode} is not a valid mode')
+            else:
+                mode_name = args.mode
+                print(f'Mode: {mode_name}')
+    '''
+    #This is if the argument mode_name is type list  Needs changes based on aditofpytohn changes to string 
+    if (args.mode):
+        try:
+            mode_name = []
+            args.mode = int(args.mode) # try to convert x to an int
+            status = camera1.getFrameTypeNameFromId(args.mode, mode_name)
+            print(f'mode_id: {args.mode}, status: {status}')
+            if status == tof.Status.Ok:
                 print(f'Mode: {mode_name}')
             else:
                 sys.exit(f'Mode: {args.mode} is invalid for this type of camera')
@@ -225,7 +243,6 @@ if __name__ == '__main__':
     frameDetails = tof.FrameDetails()
     
     warmup_start = time.monotonic()
-    print(warmup_start)
     
     warmup_time = args.warmup_time
     #Wait until the warmup time is finished
@@ -237,7 +254,7 @@ if __name__ == '__main__':
                 sys.exit("Could not request frame!")
 
     frame_size = 0;
-    print(f'Rquesting {args.ncapture} frames!')
+    print(f'Requesting {args.ncapture} frames!')
     
     #start high resolution timer
     start_time = time.perf_counter_ns()
@@ -295,16 +312,7 @@ if __name__ == '__main__':
         
         else:
             print("Can't recognize frame data type!")
-        
-        metadata = tof.Metadata
-        status, metadata = frame.getMetadataStruct()
 
-        print("frame:", loopcount)
-        print("Sensor temperature from metadata: ", metadata.sensorTemperature)
-        print("Laser temperature from metadata: ", metadata.laserTemperature)
-        print("Frame number from metadata: ", metadata.frameNumber)
-        print("Mode from metadata: ", metadata.imagerMode)
-        
         if frame_type != "full-frame":
             bin_data = frame.getData(frame_type)
             q.put(bin_data)
@@ -332,7 +340,15 @@ if __name__ == '__main__':
     if total_time > 0:
         measured_fps = args.ncapture / total_time
         print("Measured FPS: ", format(measured_fps, '.5f'))
-        
+    '''
+        metadata = tof.Metadata
+        status, metadata = frame.getMetadataStruct()
+
+    print("Sensor temperature from metadata: ", metadata.sensorTemperature)
+    print("Laser temperature from metadata: ", metadata.laserTemperature)
+    print("Frame number from metadata: ", metadata.frameNumber)
+    print("Mode from metadata: ", metadata.imagerMode)
+    '''
     status = camera1.stop()
     if status != tof.Status.Ok:
         sys.exit("Error stopping camera!")
