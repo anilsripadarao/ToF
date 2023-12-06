@@ -32,6 +32,7 @@
 import aditofpython as tof
 import argparse
 import os 
+import os.path
 import sys
 import time
 import numpy as np
@@ -51,6 +52,10 @@ mode_help_message = """Valid mode (-m) options are:
 
 IP = '10.42.0.1'
 FRAME_TYPES = ['raw', 'depth', 'ir', 'conf','metadata']
+
+#create callback and register it to the interrupt routine
+#def callbackFunction(callbackStatus):
+#    print("Running the python callback for which the status of ADSD3500 has been forwarded. ADSD3500 status = ", callbackStatus)
 
 def fileWriterTask(**kwargs):
     file_name = f"{kwargs['pFolderPath']}/{kwargs['pFrameType']}_frame_{kwargs['pTimeBuffer']}_{str(kwargs['pLoopCount'])}.bin"
@@ -130,6 +135,9 @@ if __name__ == '__main__':
     
     camera1 = cameras[0]
 
+    #sensor = camera1.getSensor()
+    #status = sensor.adsd3500_register_interrupt_callback(callbackFunction)
+    
     status = camera1.initialize(args.config)
     print('camera1.initialize()', status)
     if status != tof.Status.Ok:
@@ -308,4 +316,6 @@ if __name__ == '__main__':
     if status != tof.Status.Ok:
         sys.exit("Error stopping camera!")
         
+    #Unregister callback
+    #status = sensor.adsd3500_unregister_interrupt_callback(callbackFunction)
 
