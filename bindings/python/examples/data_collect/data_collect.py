@@ -57,15 +57,14 @@ FRAME_TYPES = ['depth', 'conf','metadata','full-frame','ab']
 q = queue.Queue()
 
 #create callback and register it to the interrupt routine
-#def callbackFunction(callbackStatus):
-#    print("Running the python callback for which the status of ADSD3500 has been forwarded. ADSD3500 status = ", callbackStatus)
+def callbackFunction(callbackStatus):
+    print("Running the python callback for which the status of ADSD3500 has been forwarded. ADSD3500 status = ", callbackStatus)
 
 def fileWriterTask(**kwargs):
     file_name = f"{kwargs['pFolderPath']}/{kwargs['pFrameType']}_frame_{kwargs['pTimeBuffer']}_{str(kwargs['pLoopCount'])}.bin"
     
     if kwargs['pFrameType'] != 'full-frame':
         with open(file_name, "wb") as file:
-            #bin_data = frame.getData(frame_type)
             file.write(bytearray(q.get()))
     else:
         if kwargs['pLoopCount'] == 0:
@@ -139,8 +138,8 @@ if __name__ == '__main__':
     
     camera1 = cameras[0]
 
-    #sensor = camera1.getSensor()
-    #status = sensor.adsd3500_register_interrupt_callback(callbackFunction)
+    sensor = camera1.getSensor()
+    status = sensor.adsd3500_register_interrupt_callback(callbackFunction)
     
     status = camera1.initialize(args.config)
     print('camera1.initialize()', status)
@@ -159,15 +158,13 @@ if __name__ == '__main__':
 
     
     if (args.firmware):
-        #status = camera1.adsd3500UpdateFirmware(args.firmware)
         if not os.path.isfile(args.firmware):
             sys.exit(f"{args.firmware} does not exists")
-
+        status = camera1.adsd3500UpdateFirmware(args.firmware)
         if status != tof.Status.Ok:
             print('Could not update the Adsd3500 firmware')
         else:
             print('Please reboot the board')
-
 
     frame_types = []
     status = camera1.getAvailableFrameTypes(frame_types)
@@ -175,26 +172,8 @@ if __name__ == '__main__':
         sys.exit('Cound not aquire frame types')
     else:
         print(f'available frame_types: {frame_types}')
-    '''
-    #Working on master. This is if the argument is string  Needs changes based on aditofpytohn changes to list        
-    mode_name = 'none'
-    if (args.mode):
-        try:
-            args.mode = int(args.mode) # try to convert x to an int
-            status = camera1.getFrameTypeNameFromId(args.mode, mode_name)
-            if status[0] == tof.Status.Ok:
-                mode_name = status[1]
-                print(f'Mode: {mode_name}')
-            else:
-                sys.exit(f'Mode: {args.mode} is invalid for this type of camera')
-        except ValueError:
-            if args.mode not in frame_types:
-                sys.exit(f'{args.mode} is not a valid mode')
-            else:
-                mode_name = args.mode
-                print(f'Mode: {mode_name}')
-    '''
-    #This is if the argument mode_name is type list  Needs changes based on aditofpytohn changes to string 
+   
+    #check mode, accepts both string and index
     if (args.mode):
         try:
             mode_name = []
@@ -286,12 +265,10 @@ if __name__ == '__main__':
             status = frame.getDataDetails(frame_type, frameDataDetails)
             if status != tof.Status.Ok:
                 sys.exit("conf disabled from ini file!")
-            frame_size = frameDataDetails.bytesCount
             
         #Metadata
         elif frame_type == "metadata":
             status = frame.getDataDetails(frame_type, frameDataDetails)
-            frame_size = frameDataDetails.bytesCount
         
         #Full raw file Data
         elif frame_type == "full-frame":
@@ -337,19 +314,19 @@ if __name__ == '__main__':
     if total_time > 0:
         measured_fps = args.ncapture / total_time
         print("Measured FPS: ", format(measured_fps, '.5f'))
-    '''
-        metadata = tof.Metadata
-        status, metadata = frame.getMetadataStruct()
+    
+    metadata = tof.Metadata
+    status, metadata = frame.getMetadataStruct()
 
     print("Sensor temperature from metadata: ", metadata.sensorTemperature)
     print("Laser temperature from metadata: ", metadata.laserTemperature)
     print("Frame number from metadata: ", metadata.frameNumber)
     print("Mode from metadata: ", metadata.imagerMode)
-    '''
+
     status = camera1.stop()
     if status != tof.Status.Ok:
         sys.exit("Error stopping camera!")
         
     #Unregister callback
-    #status = sensor.adsd3500_unregister_interrupt_callback(callbackFunction)
+    status = sensor.adsd3500_unregister_interrupt_callback(callbackFunction)
 
