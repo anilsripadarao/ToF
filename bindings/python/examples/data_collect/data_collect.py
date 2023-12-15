@@ -55,6 +55,7 @@ IP = '10.42.0.1'
 FRAME_TYPES = ['depth', 'conf','metadata','full-frame','ab']
 
 q = queue.Queue()
+lock = threading.Lock()
 
 #create callback and register it to the interrupt routine
 def callbackFunction(callbackStatus):
@@ -62,7 +63,7 @@ def callbackFunction(callbackStatus):
 
 def fileWriterTask(**kwargs):
     file_name = f"{kwargs['pFolderPath']}/{kwargs['pFrameType']}_frame_{kwargs['pTimeBuffer']}_{str(kwargs['pLoopCount'])}.bin"
-    
+    lock.acquire()
     if kwargs['pFrameType'] != 'full-frame':
         with open(file_name, "wb") as file:
             file.write(bytearray(q.get()))
@@ -75,7 +76,7 @@ def fileWriterTask(**kwargs):
             
         with open(f"{kwargs['pFolderPath']}/raw_frame_{kwargs['pTimeBuffer']}.raw", "ab") as file:
             file.write(bytearray(q.get()))
-
+    lock.release()
 if __name__ == '__main__':
     parser = argparse.ArgumentParser( formatter_class=argparse.RawTextHelpFormatter,
         description='Script to run data collect executible')
