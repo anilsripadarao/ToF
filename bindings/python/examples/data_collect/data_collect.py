@@ -52,7 +52,7 @@ mode_help_message = """Valid mode (-m) options are:
 
 
 IP = '10.42.0.1'
-FRAME_TYPES = ['depth', 'conf','metadata','full-frame','ir']
+FRAME_TYPES = ['depth', 'conf','metadata','full-frame','ab']
 
 q = queue.Queue()
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('-fw', dest='firmware', help='Adsd3500 firmware file', metavar = '<firmware>')
     parser.add_argument('-ft', dest='frame_type', choices=FRAME_TYPES,
                         default='depth', 
-                        help='FrameType of saved image [depth, conf,metadata,full-frame,ir] [default: full-frame]',
+                        help='FrameType of saved image [depth, conf,metadata,full-frame,ab] [default: full-frame]',
                         metavar = '<frameType>')
 
     args = parser.parse_args()
@@ -214,11 +214,11 @@ if __name__ == '__main__':
 
     frame_type = args.frame_type
     
-    #pcm-native contains ir only
-    if frame_type != 'ir' and mode_name == 'pcm-native':
+    #pcm-native contains ab only
+    if frame_type != 'ab' and mode_name == 'pcm-native':
         print("Mode doesn't contain depth/conf/full-frame/metadata data, setting --ft ")
-        print("(frameType) to ir.")
-        frame_type = "ir";
+        print("(frameType) to ab.")
+        frame_type = "ab";
     
     status = camera1.setFrameType(mode_name)
     if status != tof.Status.Ok:
@@ -253,7 +253,6 @@ if __name__ == '__main__':
             if status != tof.Status.Ok:
                 sys.exit("Could not request frame!")
 
-    frame_size = 0;
     print(f'Requesting {args.ncapture} frames!')
     
     #start high resolution timer
@@ -275,13 +274,12 @@ if __name__ == '__main__':
             if status != tof.Status.Ok:
                 sys.exit("Depth disabled from ini file!")                
             
-        #IR data
-        elif frame_type == "ir":
+        #ab data
+        elif frame_type == "ab":
             if mode_name != "pcm-native":
                 status = frame.getDataDetails(frame_type, frameDataDetails)
                 if status != tof.Status.Ok:
-                    sys.exit("IR disabled from ini file!")
-            frame_size = frameDataDetails.bytesCount
+                    sys.exit("ab disabled from ini file!")
         
         #Conf data
         elif frame_type == "conf" :
@@ -300,9 +298,9 @@ if __name__ == '__main__':
             status = frame.getDataDetails("depth", frameDataDetails)
             if status != tof.Status.Ok:
                 sys.exit("Depth disabled from ini file!")
-            status = frame.getDataDetails("ir", frameDataDetails)
+            status = frame.getDataDetails("ab", frameDataDetails)
             if status != tof.Status.Ok:
-                sys.exit("ir disabled from ini file!")   
+                sys.exit("ab disabled from ini file!")   
             status = frame.getDataDetails("xyz", frameDataDetails)
             if status != tof.Status.Ok:
                 sys.exit("xyz disabled from ini file!")  
@@ -317,12 +315,11 @@ if __name__ == '__main__':
             bin_data = frame.getData(frame_type)
             q.put(bin_data)
         else:
-            #frame.getData(frame_type)
-            ir_data = frame.getData("ir")
+            ab_data = frame.getData("ab")
             depth_data = frame.getData("depth")
             xyz_data = frame.getData("xyz")
             metadata_data = frame.getData("metadata")
-            bin_data = bytearray(ir_data) + bytearray(depth_data) + bytearray(xyz_data) + bytearray(metadata_data)
+            bin_data = bytearray(ab_data) + bytearray(depth_data) + bytearray(xyz_data) + bytearray(metadata_data)
             q.put(bin_data)
             
         params = {'pFolderPath': args.folder, 'pFrameType': frame_type, 'n_frames': args.ncapture,
