@@ -489,7 +489,9 @@ void ADIMainWindow::showMainMenu() {
             showPlaybackMenu();
             ImGui::Separator();
             ImGui::MenuItem("Debug Log", NULL, &show_app_log);
-            ImGui::MenuItem("Ini Params", NULL, &show_ini_window);
+            if (cameraWorkerDone && !isPlaying && !isPlayRecorded) {
+                ImGui::MenuItem("Ini Params", NULL, &show_ini_window);
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
