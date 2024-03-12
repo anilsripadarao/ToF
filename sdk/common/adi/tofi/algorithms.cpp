@@ -24,8 +24,13 @@ SOFTWARE.
 #include "algorithms.h"
 #include "opencv_undistort.h"
 
+#include <chrono>
 #include <cstring>
+#include <iostream>
 #include <math.h>
+
+using namespace std;
+using namespace chrono;
 
 uint32_t Algorithms::GenerateXYZTables(
     const float **pp_x_table, const float **pp_y_table,
@@ -33,9 +38,9 @@ uint32_t Algorithms::GenerateXYZTables(
     uint32_t n_sensor_rows, uint32_t n_sensor_cols, uint32_t n_out_rows,
     uint32_t n_out_cols, uint32_t n_offset_rows, uint32_t n_offset_cols,
     uint8_t row_bin_factor, uint8_t col_bin_factor, uint8_t iter) {
+    cout << "GenerateXYZTAbles()" << endl;
     uint32_t n_cols = n_sensor_cols / col_bin_factor;
     uint32_t n_rows = n_sensor_rows / row_bin_factor;
-
     float *p_xp = (float *)malloc(n_rows * n_cols * sizeof(float));
     float *p_yp = (float *)malloc(n_rows * n_cols * sizeof(float));
     float *p_z = (float *)malloc(n_rows * n_cols * sizeof(float));
@@ -161,17 +166,21 @@ uint32_t Algorithms::GenerateXYZTables(
 uint32_t Algorithms::ComputeXYZ(const uint16_t *p_depth, XYZTable *p_xyz_data,
                                 int16_t *p_xyz_image, uint32_t n_rows,
                                 uint32_t n_cols) {
-
+    cout << "ComputeXYZ()" << endl;
+    steady_clock::time_point t0 = steady_clock::now();
     for (int pixel_id = 0; pixel_id < n_rows * n_cols; pixel_id++) {
         p_xyz_image[3 * pixel_id + 0] = (int16_t)(floorf(
             p_xyz_data->p_x_table[pixel_id] * (float)p_depth[pixel_id] + 0.5f));
-
         p_xyz_image[3 * pixel_id + 1] = (int16_t)(floorf(
             p_xyz_data->p_y_table[pixel_id] * (float)p_depth[pixel_id] + 0.5f));
 
         p_xyz_image[3 * pixel_id + 2] = (int16_t)((
             p_xyz_data->p_z_table[pixel_id] * (float)p_depth[pixel_id] + 0.5f));
     }
+    steady_clock::time_point t1 = steady_clock::now();
+    auto elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
+    cout << "ComputeXYZ took:" << elapsed_time.count() << "us";
 
     return 0;
 }

@@ -10,6 +10,10 @@
 #include "tofi_compute.h"
 #include "tofi_error.h"
 
+#include <chrono>
+using namespace std;
+using namespace chrono;
+
 #define GEN_XYZ_ITERATIONS 20
 
 typedef struct {
@@ -67,6 +71,7 @@ DeInterleaveDepth(uint8_t *p_frame_data, uint32_t n_bits_in_depth,
                   uint32_t n_bits_in_conf, uint32_t n_bits_in_ab,
                   uint32_t n_bytes, uint32_t width, uint32_t height,
                   uint16_t *p_depth, uint16_t *p_conf, uint16_t *p_ab) {
+    steady_clock::time_point t0 = steady_clock::now();
     uint8_t *input_buffer = p_frame_data;
 
     uint16_t *out_depth = p_depth;
@@ -82,10 +87,13 @@ DeInterleaveDepth(uint8_t *p_frame_data, uint32_t n_bits_in_depth,
     uint32_t n_ab_count = n_bits_in_ab == 8 ? 0 : n_count_conf + 1;
 
     uint32_t n_pixels = width * height;
-
+    cout << "#: width = " << width << endl;
+    cout << "#: height = " << height << endl;
+    cout << "#: n_bits_in_depth = " << n_bits_in_depth << endl;
+    cout << "#: n_bits_in_conf = " << n_bits_in_conf << endl;
+    cout << "#: n_bits_in_ab = " << n_bits_in_ab << endl;
     for (uint32_t pix_id = 0; pix_id < n_pixels; pix_id++) {
         input_buffer = p_frame_data + pix_id * n_bytes;
-
         uint16_t temp = input_buffer[0] | (uint16_t)(input_buffer[1] << 8);
         out_depth[pix_id] = NUM_BITS(temp, 0, n_bits_in_depth);
 
@@ -100,9 +108,12 @@ DeInterleaveDepth(uint8_t *p_frame_data, uint32_t n_bits_in_depth,
             out_ab[pix_id] = NUM_BITS(temp, n_pos_ab, n_bits_in_ab);
         }
     }
+    steady_clock::time_point t1 = steady_clock::now();
+    auto elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0);
+    cout << "DeInterleaveDepth took:" << elapsed_time.count() << "us" << endl;
     return 0;
 }
-
 int TofiCompute(const uint16_t *const input_frame,
                 TofiComputeContext *const p_tofi_compute_context,
                 TemperatureInfo *p_temperature) {
