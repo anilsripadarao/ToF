@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 project(adi_tof_project)
 
+add_compile_options(-Ofast)
+add_link_options(-Ofast)
+add_compile_options(-march=armv8-a+simd)
+add_link_options(-march=armv8-a+simd)
+
 ####################### Disable In-source builds ##############################
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
     message(FATAL_ERROR "In-source builds are not allowed. \

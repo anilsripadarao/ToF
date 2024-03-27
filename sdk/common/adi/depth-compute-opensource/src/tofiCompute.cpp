@@ -87,11 +87,11 @@ DeInterleaveDepth(uint8_t *p_frame_data, uint32_t n_bits_in_depth,
     uint32_t n_ab_count = n_bits_in_ab == 8 ? 0 : n_count_conf + 1;
 
     uint32_t n_pixels = width * height;
-    cout << "#: width = " << width << endl;
-    cout << "#: height = " << height << endl;
-    cout << "#: n_bits_in_depth = " << n_bits_in_depth << endl;
-    cout << "#: n_bits_in_conf = " << n_bits_in_conf << endl;
-    cout << "#: n_bits_in_ab = " << n_bits_in_ab << endl;
+    //     cout << "#: width = " << width << endl;
+    //     cout << "#: height = " << height << endl;
+    //     cout << "#: n_bits_in_depth = " << n_bits_in_depth << endl;
+    //     cout << "#: n_bits_in_conf = " << n_bits_in_conf << endl;
+    //     cout << "#: n_bits_in_ab = " << n_bits_in_ab << endl;
     for (uint32_t pix_id = 0; pix_id < n_pixels; pix_id++) {
         input_buffer = p_frame_data + pix_id * n_bytes;
         uint16_t temp = input_buffer[0] | (uint16_t)(input_buffer[1] << 8);

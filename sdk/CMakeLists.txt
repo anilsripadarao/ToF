@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
 project(aditof)
 
+add_compile_options(-Ofast)
+add_link_options(-Ofast)
+add_compile_options(-march=armv8-a+simd)
+add_link_options(-march=armv8-a+simd)
+
 if(UNIX)
     set(CMAKE_POSITION_INDEPENDENT_CODE "1")
-endif()
-
-if(USE_DEPTH_COMPUTE_OPENSOURCE AND ON_TARGET)
-    add_subdirectory(common/adi/depth-compute-opensource)
 endif()
 
 add_definitions(-DSDK_EXPORTS)
@@ -106,12 +107,42 @@ file(GLOB OFFLINE_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/offline/*.h
 )
 
+if ( ON_TARGET AND UNIX )
+	if (NOT USE_DEPTH_COMPUTE_OPENSOURCE)
+                #LIBTOFI_LIBDIR_PATH - path to libtofi_config.so and libtofi_compute.so folder	
+                set(LIBTOFI_COMPUTE_CLOSED_SOURCE_PATH "${LIBTOFI_LIBDIR_PATH}/libtofi_compute.so")
+                set(LIBTOFI_CONFIG_CLOSED_SOURCE_PATH "${LIBTOFI_LIBDIR_PATH}/libtofi_config.so")
+
+                add_library(libtofi_compute SHARED IMPORTED)
+                set_target_properties(libtofi_compute PROPERTIES
+                IMPORTED_LOCATION "${LIBTOFI_COMPUTE_CLOSED_SOURCE_PATH}"
+                IMPORTED_NO_SONAME 1
+                )
+
+                add_library(libtofi_config SHARED IMPORTED)
+                set_target_properties(libtofi_config PROPERTIES
+                        IMPORTED_LOCATION "${LIBTOFI_CONFIG_CLOSED_SOURCE_PATH}"
+                        IMPORTED_NO_SONAME 1
+                        )
+
+                target_link_libraries(${PROJECT_NAME} PRIVATE libtofi_compute)
+                target_link_libraries(${PROJECT_NAME} PRIVATE libtofi_config)
+        else()
+                file(GLOB LIB_TOFI_SOURCES
+                        ${CMAKE_CURRENT_SOURCE_DIR}/${COMMON_DIR}/depth-compute-opensource/src/*.cpp
+                )
+                list(APPEND PLATFORM_SOURCES ${LIB_TOFI_SOURCES})
+                #target_link_libraries(${PROJECT_NAME} PRIVATE tofi_compute)
+                #target_link_libraries(${PROJECT_NAME} PRIVATE tofi_config)
+    endif()
+endif()	
+
 # Create target and set properties
 add_library(${PROJECT_NAME} SHARED
+    ${PLATFORM_HEADERS}
+    ${PLATFORM_SOURCES}
     ${HEADERS}
     ${SOURCES}
-    ${PLATFORM_SOURCES}
-    ${PLATFORM_HEADERS}
     $<$<BOOL:${WITH_NETWORK}>:${NETWORK_SOURCES}>
     $<$<BOOL:${WITH_NETWORK}>:${NETWORK_HEADERS}>
     $<$<BOOL:${WITH_NETWORK}>:${NET_PROTO_SRCS}>
@@ -139,6 +170,8 @@ target_include_directories(${PROJECT_NAME}
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
         src/${CAMERA_DIR}/
         ${COMMON_DIR}/
+        ${COMMON_DIR}/tofi
+        ${COMMON_DIR}/depth-compute-opensource/src
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_NET_PROTO_FILES_DIR}
         ${GENERATED_PROTO_FILES_DIR}
@@ -174,32 +207,6 @@ if (WITH_GLOG_DEPENDENCY)
     )
 endif()
 
-#LIBTOFI_LIBDIR_PATH - path to libtofi_config.so and libtofi_compute.so folder	
-set(LIBTOFI_COMPUTE_CLOSED_SOURCE_PATH "${LIBTOFI_LIBDIR_PATH}/libtofi_compute.so")
-set(LIBTOFI_CONFIG_CLOSED_SOURCE_PATH "${LIBTOFI_LIBDIR_PATH}/libtofi_config.so")
-
-if ( ON_TARGET AND UNIX )
-	if (NOT USE_DEPTH_COMPUTE_OPENSOURCE)
-                add_library(libtofi_compute SHARED IMPORTED)
-                set_target_properties(libtofi_compute PROPERTIES
-                IMPORTED_LOCATION "${LIBTOFI_COMPUTE_CLOSED_SOURCE_PATH}"
-                IMPORTED_NO_SONAME 1
-                )
-
-                add_library(libtofi_config SHARED IMPORTED)
-                set_target_properties(libtofi_config PROPERTIES
-                        IMPORTED_LOCATION "${LIBTOFI_CONFIG_CLOSED_SOURCE_PATH}"
-                        IMPORTED_NO_SONAME 1
-                        )
-
-                target_link_libraries(${PROJECT_NAME} PRIVATE libtofi_compute)
-                target_link_libraries(${PROJECT_NAME} PRIVATE libtofi_config)
-    else()
-        target_link_libraries(${PROJECT_NAME} PRIVATE tofi_compute)
-        target_link_libraries(${PROJECT_NAME} PRIVATE tofi_config)
-    endif()
-endif()	
-
 
 if (CMAKE_COMPILER_IS_GNUCC)
     target_compile_options(${PROJECT_NAME} PUBLIC
@@ -227,7 +234,7 @@ set(INSTALL_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/aditof)
 
 if (ON_TARGET) # ON TARGET
     if(USE_DEPTH_COMPUTE_OPENSOURCE) # OPEN SOURCE LIBRARIES
-        install(TARGETS aditof tofi_compute tofi_config
+        install(TARGETS aditof
             EXPORT aditof-targets
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
