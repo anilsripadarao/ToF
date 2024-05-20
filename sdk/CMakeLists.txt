@@ -19,7 +19,7 @@ if(WITH_GLOG_DEPENDENCY)
 endif()
 
 if(WITH_PROTOBUF_DEPENDENCY)
-    find_package(Protobuf 3.9.0 REQUIRED)
+    find_package(Protobuf REQUIRED)
     protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS src/connections/usb/usb_buffer.proto)
     get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HDRS} DIRECTORY)
 

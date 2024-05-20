@@ -17,7 +17,7 @@ set(ADITOF_VERSION_PATCH 0)
 set(VERSION "${ADITOF_VERSION_MAJOR}.${ADITOF_VERSION_MINOR}.${ADITOF_VERSION_PATCH}")
 
 ############################### Options #######################################
-option(WITH_EXAMPLES "Build examples?" ON)
+option(WITH_EXAMPLES "Build examples?" OFF)
 option(WITH_DOC "Build documentation?" OFF)
 option(WITH_PYTHON "Build python bindings?" OFF)
 option(WITH_OPENCV "Build opencv bindings?" OFF)
@@ -25,8 +25,8 @@ option(WITH_OPEN3D "Build open3d bindings?" OFF)
 option(WITH_ROS2 "Build ros2 bindings?" OFF)
 option(WITH_NETWORK "Build network interface?" ON)
 option(WITH_OFFLINE "Build offline interface?" OFF)
-option(WITH_GLOG_DEPENDENCY "Build with GLOG dependency to be used for logging?" ON)
-option(WITH_COMMAND_LINE_TOOLS "Build with command line tools?" ON)
+option(WITH_GLOG_DEPENDENCY "Build with GLOG dependency to be used for logging?" OFF)
+option(WITH_COMMAND_LINE_TOOLS "Build with command line tools?" OFF)
 option(CI_BUILD "Build for CI" OFF)
 
 ######################### Target based Options ################################
