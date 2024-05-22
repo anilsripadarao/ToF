@@ -171,4 +171,4 @@ endif()
 configure_file(cmake/aditof-setup.iss.cmakein ${CMAKE_CURRENT_BINARY_DIR}/aditof-setup.iss @ONLY)
 
 ############################### Version #######################################
-configure_file(cmake/version.h.cmakein ${CMAKE_SOURCE_DIR}/sdk/include/aditof/version.h @ONLY)
+configure_file(cmake/version.h.cmakein sdk/include/aditof/version.h @ONLY)
